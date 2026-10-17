@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Booma</title>
+<meta name="description" content="A song shared from Booma.">
+<style>
+  :root { --bg: #0B0716; --core: #EAFCFF; --glow: #6FE3FF; --muted: #D9D2F4; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 30%, #231F2D, var(--bg) 70%); color: var(--core);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 24px; text-align: center;
+  }
+  main { max-width: 360px; }
+  svg { width: 120px; height: 120px; filter: drop-shadow(0 0 14px var(--glow)); }
+  svg path { fill: none; stroke: var(--core); stroke-width: 34; stroke-linecap: round; stroke-linejoin: round; }
+  h1 { font-size: 22px; margin: 16px 0 6px; }
+  p { color: var(--muted); margin: 0 0 20px; line-height: 1.4; }
+  a.button {
+    display: block; padding: 14px 18px; border-radius: 999px; text-decoration: none; font-weight: 600;
+    background: var(--core); color: var(--bg); margin-bottom: 10px;
+  }
+  a.ghost { background: transparent; color: var(--core); border: 1.5px solid rgba(234, 252, 255, 0.4); }
+</style>
+</head>
+<body>
+<main>
+  <svg viewBox="0 0 1024 1024" aria-hidden="true">
+    <path d="M512,335 C470,270 390,255 330,268 C240,288 195,380 200,480 C210,640 380,760 512,865 C644,760 814,640 824,480 C829,380 784,288 694,268 C634,255 554,270 512,335 Z"/>
+    <path d="M892,480 A380,380 0 0 0 132,480"/>
+    <path d="M430,500 C440,600 480,690 512,775 C544,690 584,600 594,500"/>
+    <path d="M296,468 A62,62 0 1 0 420,468 A62,62 0 1 0 296,468 Z"/>
+    <path d="M604,468 A62,62 0 1 0 728,468 A62,62 0 1 0 604,468 Z"/>
+  </svg>
+  <h1 id="title">Opening in YouTube Music…</h1>
+  <p id="text">Someone shared this with you from Booma. If you have Booma, this link opens in it.</p>
+  <a class="button" id="open" href="https://music.youtube.com/">Open in YouTube Music</a>
+  <a class="button ghost" id="yt" href="https://www.youtube.com/">Open in YouTube</a>
+</main>
+<script>
+  // https://<you>.github.io/booma/?v=VIDEO  |  ?list=PLAYLIST  |  ?b=ALBUM_BROWSE_ID
+  const q = new URLSearchParams(location.search);
+  const ok = (s) => s && /^[A-Za-z0-9_-]+$/.test(s);
+  let music = 'https://music.youtube.com/', tube = 'https://www.youtube.com/';
+  if (ok(q.get('v'))) {
+    music += 'watch?v=' + q.get('v');
+    tube += 'watch?v=' + q.get('v');
+  } else if (ok(q.get('list'))) {
+    music += 'playlist?list=' + q.get('list');
+    tube += 'playlist?list=' + q.get('list');
+  } else if (ok(q.get('b'))) {
+    music += 'browse/' + q.get('b');
+    tube = music;
+  } else {
+    document.getElementById('title').textContent = 'Booma';
+    document.getElementById('text').textContent = 'This Booma link is missing its song.';
+  }
+  document.getElementById('open').href = music;
+  document.getElementById('yt').href = tube;
+  // without Booma: go on to YouTube Music after a moment
+  if (music !== 'https://music.youtube.com/') setTimeout(() => location.replace(music), 1200);
+</script>
+</body>
+</html>
