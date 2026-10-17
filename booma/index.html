@@ -22,6 +22,7 @@
     display: block; padding: 14px 18px; border-radius: 999px; text-decoration: none; font-weight: 600;
     background: var(--core); color: var(--bg); margin-bottom: 10px;
   }
+  [hidden] { display: none !important; }
   a.ghost { background: transparent; color: var(--core); border: 1.5px solid rgba(234, 252, 255, 0.4); }
 </style>
 </head>
@@ -34,8 +35,9 @@
     <path d="M296,468 A62,62 0 1 0 420,468 A62,62 0 1 0 296,468 Z"/>
     <path d="M604,468 A62,62 0 1 0 728,468 A62,62 0 1 0 604,468 Z"/>
   </svg>
-  <h1 id="title">Opening in YouTube Music…</h1>
-  <p id="text">Someone shared this with you from Booma. If you have Booma, this link opens in it.</p>
+  <h1 id="title">Opening…</h1>
+  <p id="text">Someone shared this with you from Booma.</p>
+  <a class="button" id="booma" href="#" hidden>Open in Booma</a>
   <a class="button" id="open" href="https://music.youtube.com/">Open in YouTube Music</a>
   <a class="button ghost" id="yt" href="https://www.youtube.com/">Open in YouTube</a>
 </main>
@@ -43,7 +45,8 @@
   // https://<you>.github.io/booma/?v=VIDEO  |  ?list=PLAYLIST  |  ?b=ALBUM_BROWSE_ID
   const q = new URLSearchParams(location.search);
   const ok = (s) => s && /^[A-Za-z0-9_-]+$/.test(s);
-  let music = 'https://music.youtube.com/', tube = 'https://www.youtube.com/';
+  let music = 'https://music.youtube.com/', tube = 'https://www.youtube.com/', key = '';
+  if (ok(q.get('v'))) key = 'v'; else if (ok(q.get('list'))) key = 'list'; else if (ok(q.get('b'))) key = 'b';
   if (ok(q.get('v'))) {
     music += 'watch?v=' + q.get('v');
     tube += 'watch?v=' + q.get('v');
@@ -59,8 +62,20 @@
   }
   document.getElementById('open').href = music;
   document.getElementById('yt').href = tube;
-  // without Booma: go on to YouTube Music after a moment
-  if (music !== 'https://music.youtube.com/') setTimeout(() => location.replace(music), 1200);
+  const android = /Android/i.test(navigator.userAgent);
+  if (key && android) {
+    // Opens Booma when it's installed; otherwise the browser goes to YouTube Music (the fallback).
+    const booma = 'intent://open/?' + key + '=' + q.get(key) +
+      '#Intent;scheme=booma;package=com.booma.app;S.browser_fallback_url=' + encodeURIComponent(music) + ';end';
+    const b = document.getElementById('booma');
+    b.href = booma; b.hidden = false;
+    document.getElementById('open').className = 'button ghost';
+    document.getElementById('title').textContent = 'Open in Booma';
+    location.href = booma;   // try straight away; if the browser blocks it, the button works
+  } else if (key) {
+    // not on Android: go on to YouTube Music after a moment
+    setTimeout(() => location.replace(music), 1200);
+  }
 </script>
 </body>
 </html>
